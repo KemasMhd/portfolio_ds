@@ -1248,6 +1248,51 @@ function initContactBackground() {
 }
 
 // ============================
+// THEME TOGGLE (Light / Dark)
+// ============================
+function initThemeToggle() {
+  const btn = document.getElementById('theme-toggle');
+  if (!btn) return;
+
+  btn.addEventListener('click', () => {
+    const html = document.documentElement;
+    const isLight = html.getAttribute('data-theme') === 'light';
+
+    if (isLight) {
+      html.removeAttribute('data-theme');
+      localStorage.setItem('portfolio_theme', 'dark');
+    } else {
+      html.setAttribute('data-theme', 'light');
+      localStorage.setItem('portfolio_theme', 'light');
+    }
+
+    // Re-init particle canvases so colors adapt
+    updateCanvasColors();
+  });
+}
+
+/**
+ * Helper: detect if we're in light mode
+ */
+function isLightMode() {
+  return document.documentElement.getAttribute('data-theme') === 'light';
+}
+
+/**
+ * Restart canvas-based backgrounds to pick up new theme colors.
+ * We simply re-trigger init for each canvas section.
+ */
+function updateCanvasColors() {
+  // The particle/hex/aurora canvases use hardcoded colors.
+  // Rather than a full rewrite, we just clear & re-init them.
+  // The small flicker is acceptable on theme switch.
+  try { initParticles(); } catch(e) {}
+  try { initSkillsBackground(); } catch(e) {}
+  try { initContactBackground(); } catch(e) {}
+}
+
+
+// ============================
 // SMOOTH SCROLL
 // ============================
 function initSmoothScroll() {
@@ -1266,6 +1311,7 @@ function initSmoothScroll() {
 // INIT
 // ============================
 document.addEventListener("DOMContentLoaded", () => {
+  initThemeToggle();
   initNavbar();
   initParticles();
   initSkillsBackground();
