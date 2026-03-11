@@ -1251,19 +1251,19 @@ function initContactBackground() {
 // THEME TOGGLE (Light / Dark)
 // ============================
 function initThemeToggle() {
-  const btn = document.getElementById('theme-toggle');
+  const btn = document.getElementById("theme-toggle");
   if (!btn) return;
 
-  btn.addEventListener('click', () => {
+  btn.addEventListener("click", () => {
     const html = document.documentElement;
-    const isLight = html.getAttribute('data-theme') === 'light';
+    const isLight = html.getAttribute("data-theme") === "light";
 
     if (isLight) {
-      html.removeAttribute('data-theme');
-      localStorage.setItem('portfolio_theme', 'dark');
+      html.removeAttribute("data-theme");
+      localStorage.setItem("portfolio_theme", "dark");
     } else {
-      html.setAttribute('data-theme', 'light');
-      localStorage.setItem('portfolio_theme', 'light');
+      html.setAttribute("data-theme", "light");
+      localStorage.setItem("portfolio_theme", "light");
     }
 
     // Re-init particle canvases so colors adapt
@@ -1275,7 +1275,7 @@ function initThemeToggle() {
  * Helper: detect if we're in light mode
  */
 function isLightMode() {
-  return document.documentElement.getAttribute('data-theme') === 'light';
+  return document.documentElement.getAttribute("data-theme") === "light";
 }
 
 /**
@@ -1286,11 +1286,16 @@ function updateCanvasColors() {
   // The particle/hex/aurora canvases use hardcoded colors.
   // Rather than a full rewrite, we just clear & re-init them.
   // The small flicker is acceptable on theme switch.
-  try { initParticles(); } catch(e) {}
-  try { initSkillsBackground(); } catch(e) {}
-  try { initContactBackground(); } catch(e) {}
+  try {
+    initParticles();
+  } catch (e) {}
+  try {
+    initSkillsBackground();
+  } catch (e) {}
+  try {
+    initContactBackground();
+  } catch (e) {}
 }
-
 
 // ============================
 // SMOOTH SCROLL
