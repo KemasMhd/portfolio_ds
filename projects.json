@@ -10,6 +10,16 @@
       "tableau": "",
       "tags": ["Python", "Pandas", "Scikit-learn"],
       "category": ["python"]
+    },
+    {
+        "title": "Emotion Detection with Bi LSTM",
+        "description": "This project implements an advanced emotion detection system using machine learning to analyze and classify emotions in counseling conversation texts. The system processes data from the CounselChat dataset, which contains real counseling questions and responses, to automatically detect emotional states that can assist mental health professionals in understanding client needs",
+        "image": "images/project2-slide 1.png",
+        "images": ["images/project2-slide 1.png", "images/project2-slide 2.png"],
+        "github": "https://github.com/KemasMhd/Emotion-Detection-With-Bi-LSTM",
+        "tableau": "",
+        "tags": ["Python", "Pandas", "Scikit-learn", "Logistic Regression"],
+        "category": ["python"]
     }
   ]
 }
