@@ -1,20 +1,15 @@
 {
-    "githubUsername": "KemasMhd",
-    "projects": [
-        {
-            "title": "Analisis Curah Hujan Menggunakan Metode Random Forest",
-            "description": "Model ini mengklasifikasikan apakah suatu minggu akan mengalami curah hujan ekstrem (is_extreme = 1) atau normal (is_extreme = 0), menggunakan fitur cuaca lokal, indeks iklim (MJO, NINO, IOD), dan fitur lag historis.",
-            "image": "",
-            "github": "https://github.com/KemasMhd/Analisis-Curah-Hujan",
-            "tableau": "",
-            "tags": [
-                "Python",
-                "Pandas",
-                "dll"
-            ],
-            "category": [
-                "python"
-            ]
-        }
-    ]
+  "githubUsername": "KemasMhd",
+  "projects": [
+    {
+      "title": "Analisis Curah Hujan Menggunakan Metode Random Forest",
+      "description": "Model ini mengklasifikasikan apakah suatu minggu akan mengalami curah hujan ekstrem (is_extreme = 1) atau normal (is_extreme = 0), menggunakan fitur cuaca lokal, indeks iklim (MJO, NINO, IOD), dan fitur lag historis.",
+      "image": "images/project1-slide1.png",
+      "images": ["images/project1-slide1.png", "images/project1-slide2.png"],
+      "github": "https://github.com/KemasMhd/Analisis-Curah-Hujan",
+      "tableau": "",
+      "tags": ["Python", "Pandas", "Scikit-learn"],
+      "category": ["python"]
+    }
+  ]
 }
