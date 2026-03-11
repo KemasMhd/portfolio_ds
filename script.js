@@ -718,6 +718,286 @@ function initParticles() {
 
 
 // ============================
+// SKILLS SECTION — HEX GRID
+// ============================
+function initSkillsBackground() {
+    const canvas = document.getElementById('skills-canvas');
+    if (!canvas) return;
+
+    const ctx = canvas.getContext('2d');
+    const section = canvas.closest('.skills');
+
+    let width, height;
+    let mouse = { x: -1000, y: -1000 };
+    let animationId;
+    let isVisible = false;
+
+    const hexSize = window.innerWidth < 768 ? 35 : 28;
+    const hexHeight = hexSize * Math.sqrt(3);
+
+    function resize() {
+        const rect = section.getBoundingClientRect();
+        const dpr = Math.min(window.devicePixelRatio || 1, 2);
+        width = rect.width;
+        height = rect.height;
+        canvas.width = width * dpr;
+        canvas.height = height * dpr;
+        canvas.style.width = width + 'px';
+        canvas.style.height = height + 'px';
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    }
+
+    function drawHex(cx, cy, size) {
+        ctx.beginPath();
+        for (let i = 0; i < 6; i++) {
+            const angle = (Math.PI / 3) * i - Math.PI / 6;
+            const x = cx + size * Math.cos(angle);
+            const y = cy + size * Math.sin(angle);
+            if (i === 0) ctx.moveTo(x, y);
+            else ctx.lineTo(x, y);
+        }
+        ctx.closePath();
+    }
+
+    function animate(time) {
+        if (!isVisible) {
+            animationId = requestAnimationFrame(animate);
+            return;
+        }
+
+        ctx.clearRect(0, 0, width, height);
+
+        const colWidth = hexSize * 1.5;
+        const cols = Math.ceil(width / colWidth) + 2;
+        const rows = Math.ceil(height / hexHeight) + 2;
+
+        for (let col = -1; col < cols; col++) {
+            for (let row = -1; row < rows; row++) {
+                const cx = col * colWidth;
+                const cy = row * hexHeight + (col % 2 === 0 ? 0 : hexHeight / 2);
+
+                // Distance from mouse
+                const dx = cx - mouse.x;
+                const dy = cy - mouse.y;
+                const dist = Math.sqrt(dx * dx + dy * dy);
+                const mouseRadius = 180;
+
+                // Base pulse
+                const pulse = Math.sin(time * 0.0005 + col * 0.3 + row * 0.2) * 0.02;
+                let opacity = 0.04 + pulse;
+                let strokeColor = `rgba(99, 102, 241, ${opacity})`;
+
+                // Mouse highlight
+                if (dist < mouseRadius) {
+                    const proximity = 1 - dist / mouseRadius;
+                    opacity = 0.04 + proximity * 0.2;
+                    const r = Math.round(99 + proximity * 40);
+                    const g = Math.round(102 - proximity * 10);
+                    const b = Math.round(241 + proximity * 5);
+                    strokeColor = `rgba(${r}, ${g}, ${b}, ${opacity})`;
+
+                    // Glow fill on close hexagons
+                    if (proximity > 0.5) {
+                        drawHex(cx, cy, hexSize - 2);
+                        ctx.fillStyle = `rgba(139, 92, 246, ${proximity * 0.04})`;
+                        ctx.fill();
+                    }
+                }
+
+                drawHex(cx, cy, hexSize - 2);
+                ctx.strokeStyle = strokeColor;
+                ctx.lineWidth = 0.5;
+                ctx.stroke();
+            }
+        }
+
+        animationId = requestAnimationFrame(animate);
+    }
+
+    const visibilityObserver = new IntersectionObserver((entries) => {
+        isVisible = entries[0].isIntersecting;
+    }, { threshold: 0 });
+    visibilityObserver.observe(section);
+
+    section.addEventListener('mousemove', (e) => {
+        const rect = section.getBoundingClientRect();
+        mouse.x = e.clientX - rect.left;
+        mouse.y = e.clientY - rect.top;
+    });
+
+    section.addEventListener('mouseleave', () => {
+        mouse.x = -1000;
+        mouse.y = -1000;
+    });
+
+    window.addEventListener('resize', () => {
+        if (animationId) cancelAnimationFrame(animationId);
+        resize();
+        animate(0);
+    });
+
+    resize();
+    animate(0);
+}
+
+
+// ============================
+// CONTACT SECTION — AURORA
+// ============================
+function initContactBackground() {
+    const canvas = document.getElementById('contact-canvas');
+    if (!canvas) return;
+
+    const ctx = canvas.getContext('2d');
+    const section = canvas.closest('.contact');
+
+    let width, height;
+    let blobs = [];
+    let mouse = { x: -1000, y: -1000, smoothX: -1000, smoothY: -1000 };
+    let animationId;
+    let isVisible = false;
+
+    class Blob {
+        constructor(index, total) {
+            this.speed = 0.0002 + Math.random() * 0.0003;
+            this.radiusX = 0.12 + Math.random() * 0.18;
+            this.radiusY = 0.08 + Math.random() * 0.12;
+            this.orbitX = 0.2 + Math.random() * 0.6;
+            this.orbitY = 0.2 + Math.random() * 0.6;
+            this.size = 180 + Math.random() * 180;
+            this.phaseOffset = Math.random() * Math.PI * 2;
+
+            const colors = [
+                { r: 99, g: 102, b: 241 },
+                { r: 139, g: 92, b: 246 },
+                { r: 79, g: 70, b: 229 },
+                { r: 129, g: 140, b: 248 },
+                { r: 167, g: 139, b: 250 },
+            ];
+            this.color = colors[index % colors.length];
+            this.baseOpacity = 0.025 + Math.random() * 0.02;
+        }
+
+        update(time) {
+            const t = time * this.speed + this.phaseOffset;
+            this.x = width * (this.orbitX + Math.sin(t) * this.radiusX);
+            this.y = height * (this.orbitY + Math.cos(t * 0.7) * this.radiusY);
+
+            if (mouse.smoothX > 0 && mouse.smoothY > 0) {
+                const dx = mouse.smoothX - this.x;
+                const dy = mouse.smoothY - this.y;
+                const dist = Math.sqrt(dx * dx + dy * dy);
+                if (dist < 350) {
+                    const pull = (1 - dist / 350) * 0.06;
+                    this.x += dx * pull;
+                    this.y += dy * pull;
+                }
+            }
+
+            this.currentSize = this.size + Math.sin(time * 0.0005 + this.phaseOffset) * 30;
+            this.currentOpacity = this.baseOpacity + Math.sin(time * 0.0003 + this.phaseOffset) * 0.008;
+        }
+
+        draw() {
+            const gradient = ctx.createRadialGradient(
+                this.x, this.y, 0,
+                this.x, this.y, this.currentSize
+            );
+            const { r, g, b } = this.color;
+            gradient.addColorStop(0, `rgba(${r}, ${g}, ${b}, ${this.currentOpacity})`);
+            gradient.addColorStop(0.5, `rgba(${r}, ${g}, ${b}, ${this.currentOpacity * 0.4})`);
+            gradient.addColorStop(1, `rgba(${r}, ${g}, ${b}, 0)`);
+
+            ctx.fillStyle = gradient;
+            ctx.fillRect(
+                this.x - this.currentSize,
+                this.y - this.currentSize,
+                this.currentSize * 2,
+                this.currentSize * 2
+            );
+        }
+    }
+
+    function resize() {
+        const rect = section.getBoundingClientRect();
+        const dpr = Math.min(window.devicePixelRatio || 1, 2);
+        width = rect.width;
+        height = rect.height;
+        canvas.width = width * dpr;
+        canvas.height = height * dpr;
+        canvas.style.width = width + 'px';
+        canvas.style.height = height + 'px';
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    }
+
+    function init() {
+        blobs = [];
+        const count = window.innerWidth < 768 ? 3 : 5;
+        for (let i = 0; i < count; i++) {
+            blobs.push(new Blob(i, count));
+        }
+    }
+
+    function animate(time) {
+        if (!isVisible) {
+            animationId = requestAnimationFrame(animate);
+            return;
+        }
+
+        mouse.smoothX += (mouse.x - mouse.smoothX) * 0.05;
+        mouse.smoothY += (mouse.y - mouse.smoothY) * 0.05;
+
+        ctx.clearRect(0, 0, width, height);
+
+        if (mouse.smoothX > 0 && mouse.smoothY > 0) {
+            const glow = ctx.createRadialGradient(
+                mouse.smoothX, mouse.smoothY, 0,
+                mouse.smoothX, mouse.smoothY, 200
+            );
+            glow.addColorStop(0, 'rgba(139, 92, 246, 0.025)');
+            glow.addColorStop(1, 'rgba(0, 0, 0, 0)');
+            ctx.fillStyle = glow;
+            ctx.fillRect(mouse.smoothX - 200, mouse.smoothY - 200, 400, 400);
+        }
+
+        blobs.forEach(blob => {
+            blob.update(time);
+            blob.draw();
+        });
+
+        animationId = requestAnimationFrame(animate);
+    }
+
+    const visibilityObserver = new IntersectionObserver((entries) => {
+        isVisible = entries[0].isIntersecting;
+    }, { threshold: 0 });
+    visibilityObserver.observe(section);
+
+    section.addEventListener('mousemove', (e) => {
+        const rect = section.getBoundingClientRect();
+        mouse.x = e.clientX - rect.left;
+        mouse.y = e.clientY - rect.top;
+    });
+
+    section.addEventListener('mouseleave', () => {
+        mouse.x = -1000;
+        mouse.y = -1000;
+    });
+
+    window.addEventListener('resize', () => {
+        if (animationId) cancelAnimationFrame(animationId);
+        resize();
+        init();
+        animate(0);
+    });
+
+    resize();
+    init();
+    animate(0);
+}
+
+
+// ============================
 // SMOOTH SCROLL
 // ============================
 function initSmoothScroll() {
@@ -739,6 +1019,8 @@ function initSmoothScroll() {
 document.addEventListener('DOMContentLoaded', () => {
     initNavbar();
     initParticles();
+    initSkillsBackground();
+    initContactBackground();
     initSmoothScroll();
     initModal();
     initScrollReveal();
