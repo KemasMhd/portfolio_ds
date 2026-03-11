@@ -465,6 +465,19 @@ function initCounters() {
                 const el = entry.target;
                 const target = parseInt(el.getAttribute('data-count'));
                 animateCounter(el, target);
+
+                // Also animate the progress bar in the same card
+                const card = el.closest('.stat-card');
+                if (card) {
+                    const barFill = card.querySelector('.stat-bar-fill');
+                    if (barFill) {
+                        const targetWidth = barFill.getAttribute('data-width') || 50;
+                        setTimeout(() => {
+                            barFill.style.width = targetWidth + '%';
+                        }, 300);
+                    }
+                }
+
                 observer.unobserve(el);
             }
         });
@@ -493,25 +506,214 @@ function animateCounter(el, target) {
 
 
 // ============================
-// HERO PARTICLES
+// INTERACTIVE PARTICLE NETWORK
 // ============================
 function initParticles() {
-    const container = document.getElementById('hero-particles');
-    const count = 30;
+    const canvas = document.getElementById('hero-canvas');
+    if (!canvas) return;
 
-    for (let i = 0; i < count; i++) {
-        const particle = document.createElement('div');
-        particle.className = 'particle';
-        particle.style.left = Math.random() * 100 + '%';
-        particle.style.top = Math.random() * 100 + '%';
-        particle.style.animationDelay = Math.random() * 8 + 's';
-        particle.style.animationDuration = (Math.random() * 4 + 6) + 's';
-        particle.style.width = (Math.random() * 3 + 1) + 'px';
-        particle.style.height = particle.style.width;
-        const hue = Math.random() > 0.5 ? '239' : '259';
-        particle.style.background = `hsl(${hue}, 80%, 70%)`;
-        container.appendChild(particle);
+    const ctx = canvas.getContext('2d');
+    const hero = canvas.closest('.hero');
+
+    let width, height;
+    let particles = [];
+    let mouse = { x: -1000, y: -1000, radius: 150 };
+    let animationId;
+
+    const CONFIG = {
+        particleCount: window.innerWidth < 768 ? 40 : 70,
+        maxSpeed: 0.4,
+        connectionDistance: 140,
+        mouseConnectionDistance: 200,
+        particleMinSize: 1,
+        particleMaxSize: 3,
+        colors: [
+            'rgba(99, 102, 241, ',   // indigo
+            'rgba(139, 92, 246, ',   // violet
+            'rgba(167, 139, 250, ',  // light violet
+            'rgba(129, 140, 248, ',  // periwinkle
+        ],
+        mouseGlowColor: 'rgba(99, 102, 241, 0.08)',
+    };
+
+    class Particle {
+        constructor() {
+            this.reset();
+        }
+
+        reset() {
+            this.x = Math.random() * width;
+            this.y = Math.random() * height;
+            this.vx = (Math.random() - 0.5) * CONFIG.maxSpeed * 2;
+            this.vy = (Math.random() - 0.5) * CONFIG.maxSpeed * 2;
+            this.size = Math.random() * (CONFIG.particleMaxSize - CONFIG.particleMinSize) + CONFIG.particleMinSize;
+            this.colorBase = CONFIG.colors[Math.floor(Math.random() * CONFIG.colors.length)];
+            this.opacity = Math.random() * 0.5 + 0.3;
+            this.pulseSpeed = Math.random() * 0.02 + 0.005;
+            this.pulsePhase = Math.random() * Math.PI * 2;
+        }
+
+        update(time) {
+            // Drift movement
+            this.x += this.vx;
+            this.y += this.vy;
+
+            // Pulse opacity
+            this.currentOpacity = this.opacity + Math.sin(time * this.pulseSpeed + this.pulsePhase) * 0.15;
+
+            // Mouse interaction — gentle repulsion and attraction
+            const dx = this.x - mouse.x;
+            const dy = this.y - mouse.y;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+
+            if (dist < mouse.radius) {
+                const force = (1 - dist / mouse.radius) * 0.02;
+                this.vx += dx * force;
+                this.vy += dy * force;
+            }
+
+            // Speed damping
+            const speed = Math.sqrt(this.vx * this.vx + this.vy * this.vy);
+            if (speed > CONFIG.maxSpeed) {
+                this.vx *= CONFIG.maxSpeed / speed;
+                this.vy *= CONFIG.maxSpeed / speed;
+            }
+
+            // Wrap around edges with padding
+            const pad = 20;
+            if (this.x < -pad) this.x = width + pad;
+            if (this.x > width + pad) this.x = -pad;
+            if (this.y < -pad) this.y = height + pad;
+            if (this.y > height + pad) this.y = -pad;
+        }
+
+        draw() {
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+            ctx.fillStyle = this.colorBase + this.currentOpacity + ')';
+            ctx.fill();
+
+            // Subtle glow for larger particles
+            if (this.size > 2) {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size * 3, 0, Math.PI * 2);
+                ctx.fillStyle = this.colorBase + (this.currentOpacity * 0.1) + ')';
+                ctx.fill();
+            }
+        }
     }
+
+    function drawConnections(time) {
+        for (let i = 0; i < particles.length; i++) {
+            for (let j = i + 1; j < particles.length; j++) {
+                const dx = particles[i].x - particles[j].x;
+                const dy = particles[i].y - particles[j].y;
+                const dist = Math.sqrt(dx * dx + dy * dy);
+
+                if (dist < CONFIG.connectionDistance) {
+                    const opacity = (1 - dist / CONFIG.connectionDistance) * 0.15;
+                    ctx.beginPath();
+                    ctx.moveTo(particles[i].x, particles[i].y);
+                    ctx.lineTo(particles[j].x, particles[j].y);
+                    ctx.strokeStyle = `rgba(99, 102, 241, ${opacity})`;
+                    ctx.lineWidth = 0.5;
+                    ctx.stroke();
+                }
+            }
+
+            // Mouse connections — brighter lines to nearby particles
+            const dxm = particles[i].x - mouse.x;
+            const dym = particles[i].y - mouse.y;
+            const distm = Math.sqrt(dxm * dxm + dym * dym);
+
+            if (distm < CONFIG.mouseConnectionDistance) {
+                const opacity = (1 - distm / CONFIG.mouseConnectionDistance) * 0.3;
+                ctx.beginPath();
+                ctx.moveTo(particles[i].x, particles[i].y);
+                ctx.lineTo(mouse.x, mouse.y);
+                ctx.strokeStyle = `rgba(139, 92, 246, ${opacity})`;
+                ctx.lineWidth = 0.8;
+                ctx.stroke();
+            }
+        }
+    }
+
+    function drawMouseGlow() {
+        if (mouse.x < 0 || mouse.y < 0) return;
+        const gradient = ctx.createRadialGradient(mouse.x, mouse.y, 0, mouse.x, mouse.y, 200);
+        gradient.addColorStop(0, 'rgba(99, 102, 241, 0.06)');
+        gradient.addColorStop(0.5, 'rgba(139, 92, 246, 0.02)');
+        gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
+        ctx.fillStyle = gradient;
+        ctx.fillRect(mouse.x - 200, mouse.y - 200, 400, 400);
+    }
+
+    function animate(time) {
+        ctx.clearRect(0, 0, width, height);
+
+        drawMouseGlow();
+        drawConnections(time);
+
+        particles.forEach(p => {
+            p.update(time);
+            p.draw();
+        });
+
+        animationId = requestAnimationFrame(animate);
+    }
+
+    function resize() {
+        const rect = hero.getBoundingClientRect();
+        const dpr = Math.min(window.devicePixelRatio || 1, 2);
+        width = rect.width;
+        height = rect.height;
+        canvas.width = width * dpr;
+        canvas.height = height * dpr;
+        canvas.style.width = width + 'px';
+        canvas.style.height = height + 'px';
+        ctx.scale(dpr, dpr);
+    }
+
+    function init() {
+        resize();
+        particles = [];
+        for (let i = 0; i < CONFIG.particleCount; i++) {
+            particles.push(new Particle());
+        }
+    }
+
+    // Mouse tracking (relative to hero section)
+    hero.addEventListener('mousemove', (e) => {
+        const rect = hero.getBoundingClientRect();
+        mouse.x = e.clientX - rect.left;
+        mouse.y = e.clientY - rect.top;
+    });
+
+    hero.addEventListener('mouseleave', () => {
+        mouse.x = -1000;
+        mouse.y = -1000;
+    });
+
+    // Touch support
+    hero.addEventListener('touchmove', (e) => {
+        const rect = hero.getBoundingClientRect();
+        mouse.x = e.touches[0].clientX - rect.left;
+        mouse.y = e.touches[0].clientY - rect.top;
+    }, { passive: true });
+
+    hero.addEventListener('touchend', () => {
+        mouse.x = -1000;
+        mouse.y = -1000;
+    });
+
+    window.addEventListener('resize', () => {
+        if (animationId) cancelAnimationFrame(animationId);
+        init();
+        animate(0);
+    });
+
+    init();
+    animate(0);
 }
 
 
