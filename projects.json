@@ -2,24 +2,54 @@
   "githubUsername": "KemasMhd",
   "projects": [
     {
-      "title": "Analisis Curah Hujan Menggunakan Metode Random Forest",
-      "description": "Model ini mengklasifikasikan apakah suatu minggu akan mengalami curah hujan ekstrem (is_extreme = 1) atau normal (is_extreme = 0), menggunakan fitur cuaca lokal, indeks iklim (MJO, NINO, IOD), dan fitur lag historis.",
+      "title": "Aplikasi Transaksi SPBU",
+      "description": "A Spring Boot task management web application with authentication, CRUD features, and a responsive UI for managing projects and daily tasks.",
       "image": "images/project1-slide1.png",
       "images": ["images/project1-slide1.png", "images/project1-slide2.png"],
-      "github": "https://github.com/KemasMhd/Analisis-Curah-Hujan",
+      "github": "https://github.com/KemasMhd/Aplikasi-Transaksi-SPBU",
       "tableau": "",
-      "tags": ["Python", "Pandas", "Scikit-learn"],
-      "category": ["python"]
+      "tags": ["Java", "Spring Boot", "MySQL"],
+      "category": ["java", "spring", "web"]
     },
     {
-        "title": "Emotion Detection with Bi LSTM",
-        "description": "This project implements an advanced emotion detection system using machine learning to analyze and classify emotions in counseling conversation texts. The system processes data from the CounselChat dataset, which contains real counseling questions and responses, to automatically detect emotional states that can assist mental health professionals in understanding client needs",
-        "image": "images/project2-slide 1.png",
-        "images": ["images/project2-slide 1.png", "images/project2-slide 2.png"],
-        "github": "https://github.com/KemasMhd/Emotion-Detection-With-Bi-LSTM",
-        "tableau": "",
-        "tags": ["Python", "Pandas", "Scikit-learn", "Logistic Regression"],
-        "category": ["python"]
+      "title": "Purchase Management Form",
+      "description": "A Java Swing desktop application prototype for managing purchase transaction data, featuring supplier information, purchase details, item entries, and invoice totals.",
+      "image": "images/project2-slide 1.png",
+      "images": ["images/project2-slide 1.png", "images/project2-slide 2.png"],
+      "github": "https://github.com/KemasMhd/Purchase-Management-Form",
+      "tableau": "",
+      "tags": ["Java", "Java Swing", "Netbeans", "Desktop Application"],
+      "category": ["java", "web"]
+    },
+    {
+      "title": "Student Exam Grade Calculator",
+      "description": "A Java console application that applies object-oriented programming principles to manage exam data, calculate average scores, and determine student graduation status.",
+      "image": "images/project3-slide 1.png",
+      "images": ["images/project3-slide 1.png", "images/project3-slide 2.png"],
+      "github": "https://github.com/KemasMhd/Student-Exam-Grade-Calculator",
+      "tableau": "",
+      "tags": [
+        "Java",
+        "Basic Java",
+        "Conditional Logic",
+        "Console Application"
+      ],
+      "category": ["java", "console"]
+    },
+    {
+      "title": "Student Grade & Graduation Status Calculator",
+      "description": "A Java console application that calculates a student's average grade from multiple subjects and determines their graduation status based on a predefined passing threshold.",
+      "image": "images/project3-slide 1.png",
+      "images": ["images/project3-slide 1.png", "images/project3-slide 2.png"],
+      "github": "https://github.com/KemasMhd/Student-Grade-Graduation-Status-Calculator",
+      "tableau": "",
+      "tags": [
+        "Java",
+        "Basic Java",
+        "Conditional Logic",
+        "Console Application"
+      ],
+      "category": ["java", "console"]
     }
   ]
 }

@@ -100,14 +100,16 @@ async function fetchGitHubProjects() {
 function mapGitHubRepoToProject(repo) {
   // Convert topic names to categories for filtering
   const topicToCategoryMap = {
-    python: "python",
-    tableau: "tableau",
-    "machine-learning": "ml",
-    ml: "ml",
-    "deep-learning": "ml",
-    "data-science": "python",
-    sql: "python",
-    nlp: "ml",
+    java: "java",
+    spring: "spring",
+    "spring-boot": "spring",
+    web: "web",
+    frontend: "web",
+    backend: "java",
+    api: "web",
+    rest: "web",
+    mysql: "web",
+    postgresql: "web",
   };
 
   const categories = [];
@@ -140,9 +142,9 @@ function mapGitHubRepoToProject(repo) {
     description: repo.description || "No description available.",
     image: "", // GitHub repos won't have local images, placeholder will be used
     github: repo.html_url,
-    tableau: repo.homepage || "", // Use homepage field for Tableau/demo link
-    tags: tags.length > 0 ? tags : ["Data Science"],
-    category: categories.length > 0 ? categories : ["python"],
+    tableau: repo.homepage || "", // Use homepage field for demo link
+    tags: tags.length > 0 ? tags : ["Java"],
+    category: categories.length > 0 ? categories : ["java"],
     _fromGitHub: true, // Internal flag to identify auto-detected projects
     _repoFullName: repo.full_name,
   };
@@ -160,24 +162,20 @@ function formatRepoName(name) {
  */
 function formatTopicAsTag(topic) {
   const specialNames = {
-    python: "Python",
-    sql: "SQL",
-    nlp: "NLP",
-    ml: "ML",
-    xgboost: "XGBoost",
-    "scikit-learn": "Scikit-Learn",
-    tensorflow: "TensorFlow",
-    pytorch: "PyTorch",
-    tableau: "Tableau",
-    pandas: "Pandas",
-    numpy: "NumPy",
-    "machine-learning": "Machine Learning",
-    "deep-learning": "Deep Learning",
-    "data-science": "Data Science",
-    "data-analysis": "Data Analysis",
-    "data-visualization": "Data Visualization",
-    "web-scraping": "Web Scraping",
-    r: "R",
+    java: "Java",
+    spring: "Spring",
+    "spring-boot": "Spring Boot",
+    web: "Web",
+    frontend: "Frontend",
+    backend: "Backend",
+    api: "API",
+    rest: "REST",
+    mysql: "MySQL",
+    postgresql: "PostgreSQL",
+    thymeleaf: "Thymeleaf",
+    gradle: "Gradle",
+    maven: "Maven",
+    docker: "Docker",
   };
   return (
     specialNames[topic] ||
@@ -275,11 +273,11 @@ function renderProjects(filter = "all") {
                 </span>`
       : "";
 
-    // Build tableau link HTML
+    // Build demo link HTML
     const tableauLink = project.tableau
       ? `<a href="${project.tableau}" target="_blank" rel="noopener" class="project-link" onclick="event.stopPropagation()">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
-                    Tableau
+                    Demo
                </a>`
       : "";
 
@@ -363,7 +361,7 @@ function generatePlaceholderSVG(title) {
         </defs>
         <rect width="640" height="400" fill="url(#g)" rx="0"/>
         <text x="320" y="180" font-family="Inter,sans-serif" font-size="48" font-weight="700" fill="rgba(255,255,255,0.9)" text-anchor="middle">${initials}</text>
-        <text x="320" y="230" font-family="Inter,sans-serif" font-size="16" fill="rgba(255,255,255,0.5)" text-anchor="middle">Tableau Visualization</text>
+        <text x="320" y="230" font-family="Inter,sans-serif" font-size="16" fill="rgba(255,255,255,0.5)" text-anchor="middle">Java Web Project</text>
         <rect x="220" y="260" width="200" height="4" rx="2" fill="rgba(255,255,255,0.15)"/>
         <rect x="260" y="275" width="120" height="4" rx="2" fill="rgba(255,255,255,0.1)"/>
     </svg>`;
@@ -424,16 +422,8 @@ function initModal() {
   });
 }
 
-// ============================
-// PROJECT DETAIL MODAL + SLIDER
-// ============================
-let currentSlide = 0;
-let totalSlides = 0;
-
 function openProjectModal(project) {
   const modal = document.getElementById("project-modal");
-  const track = document.getElementById("project-slider-track");
-  const dotsContainer = document.getElementById("slider-dots");
 
   // Populate info
   document.getElementById("project-modal-title").textContent = project.title;
@@ -458,63 +448,10 @@ function openProjectModal(project) {
   if (project.tableau) {
     linksHTML += `<a href="${project.tableau}" target="_blank" rel="noopener" class="project-link">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
-            Tableau
+            Demo
         </a>`;
   }
   linksEl.innerHTML = linksHTML;
-
-  // Build slides — use images array, fall back to single image, then placeholder
-  const images =
-    project.images && project.images.length > 0
-      ? project.images
-      : project.image
-      ? [project.image]
-      : [];
-
-  if (images.length === 0) {
-    // No images — show placeholder
-    const placeholderSrc =
-      "data:image/svg+xml," +
-      encodeURIComponent(generatePlaceholderSVG(project.title));
-    images.push(placeholderSrc);
-  }
-
-  totalSlides = images.length;
-  currentSlide = 0;
-
-  track.innerHTML = images
-    .map(
-      (src, i) => `
-        <div class="slide">
-            <img src="${src}" alt="${project.title} — slide ${
-        i + 1
-      }" onerror="this.src='data:image/svg+xml,${encodeURIComponent(
-        generatePlaceholderSVG(project.title)
-      )}'">
-        </div>
-    `
-    )
-    .join("");
-
-  // Dots
-  if (totalSlides > 1) {
-    dotsContainer.innerHTML = images
-      .map(
-        (_, i) =>
-          `<button class="slider-dot${
-            i === 0 ? " active" : ""
-          }" data-index="${i}" aria-label="Slide ${i + 1}"></button>`
-      )
-      .join("");
-    dotsContainer.style.display = "flex";
-  } else {
-    dotsContainer.innerHTML = "";
-    dotsContainer.style.display = "none";
-  }
-
-  // Show/hide nav buttons
-  updateSliderButtons();
-  updateSliderPosition();
 
   modal.classList.add("active");
   document.body.style.overflow = "hidden";
@@ -526,40 +463,6 @@ function closeProjectModal() {
   document.body.style.overflow = "";
 }
 
-function goToSlide(index) {
-  if (index < 0 || index >= totalSlides) return;
-  currentSlide = index;
-  updateSliderPosition();
-  updateSliderButtons();
-  updateSliderDots();
-}
-
-function updateSliderPosition() {
-  const track = document.getElementById("project-slider-track");
-  track.style.transform = `translateX(-${currentSlide * 100}%)`;
-}
-
-function updateSliderButtons() {
-  const prevBtn = document.getElementById("slider-prev");
-  const nextBtn = document.getElementById("slider-next");
-  if (totalSlides <= 1) {
-    prevBtn.style.display = "none";
-    nextBtn.style.display = "none";
-  } else {
-    prevBtn.style.display = "flex";
-    nextBtn.style.display = "flex";
-    prevBtn.style.opacity = currentSlide === 0 ? "0.3" : "";
-    nextBtn.style.opacity = currentSlide === totalSlides - 1 ? "0.3" : "";
-  }
-}
-
-function updateSliderDots() {
-  const dots = document.querySelectorAll("#slider-dots .slider-dot");
-  dots.forEach((dot, i) => {
-    dot.classList.toggle("active", i === currentSlide);
-  });
-}
-
 function initProjectModal() {
   // Close handlers
   document
@@ -568,42 +471,6 @@ function initProjectModal() {
   document
     .querySelector(".project-modal-overlay")
     .addEventListener("click", closeProjectModal);
-
-  // Slider navigation
-  document
-    .getElementById("slider-prev")
-    .addEventListener("click", () => goToSlide(currentSlide - 1));
-  document
-    .getElementById("slider-next")
-    .addEventListener("click", () => goToSlide(currentSlide + 1));
-
-  // Dot clicks
-  document.getElementById("slider-dots").addEventListener("click", (e) => {
-    const dot = e.target.closest(".slider-dot");
-    if (dot) goToSlide(parseInt(dot.dataset.index));
-  });
-
-  // Touch swipe support for slider
-  let touchStartX = 0;
-  let touchEndX = 0;
-  const slider = document.getElementById("project-slider");
-
-  slider.addEventListener(
-    "touchstart",
-    (e) => {
-      touchStartX = e.changedTouches[0].screenX;
-    },
-    { passive: true }
-  );
-
-  slider.addEventListener("touchend", (e) => {
-    touchEndX = e.changedTouches[0].screenX;
-    const diff = touchStartX - touchEndX;
-    if (Math.abs(diff) > 50) {
-      if (diff > 0) goToSlide(currentSlide + 1);
-      else goToSlide(currentSlide - 1);
-    }
-  });
 }
 
 // ============================

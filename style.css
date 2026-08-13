@@ -59,7 +59,7 @@
    LIGHT MODE OVERRIDES
    ============================ */
 [data-theme="light"] {
-  --bg-primary: #f5f5f7;
+  --bg-primary: #f8f4ff;
   --bg-secondary: #ffffff;
   --bg-card: rgba(0, 0, 0, 0.02);
   --bg-card-hover: rgba(0, 0, 0, 0.04);
@@ -867,57 +867,6 @@ img {
   box-shadow: var(--shadow-glow), var(--shadow-md);
 }
 
-.project-card-image {
-  position: relative;
-  aspect-ratio: 16/10;
-  overflow: hidden;
-  cursor: pointer;
-}
-
-.project-card-image img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  transition: transform var(--transition-slow);
-}
-
-.project-card:hover .project-card-image img {
-  transform: scale(1.05);
-}
-
-.project-card-image .image-overlay {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(to top, rgba(10, 10, 15, 0.6), transparent);
-  opacity: 0;
-  transition: opacity var(--transition-base);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.project-card:hover .image-overlay {
-  opacity: 1;
-}
-
-.image-overlay .zoom-icon {
-  width: 48px;
-  height: 48px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.15);
-  backdrop-filter: blur(10px);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #fff;
-  transform: scale(0.8);
-  transition: transform var(--transition-base);
-}
-
-.project-card:hover .zoom-icon {
-  transform: scale(1);
-}
-
 .project-card-body {
   padding: 24px;
 }
@@ -934,6 +883,7 @@ img {
   color: var(--text-muted);
   line-height: 1.7;
   margin-bottom: 16px;
+  line-clamp: 3;
   display: -webkit-box;
   -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
@@ -1171,6 +1121,12 @@ img {
   font-size: var(--font-size-sm);
 }
 
+.project-card-image,
+.project-card-image .image-overlay,
+.image-overlay .zoom-icon {
+  display: none;
+}
+
 /* ============================
    PROJECT DETAIL MODAL
    ============================ */
@@ -1202,7 +1158,7 @@ img {
   position: relative;
   z-index: 1;
   width: 90vw;
-  max-width: 640px;
+  max-width: 560px;
   max-height: 90vh;
   background: var(--bg-secondary);
   border: 1px solid var(--glass-border);
@@ -1248,97 +1204,6 @@ img {
 .project-modal-body {
   overflow-y: auto;
   overscroll-behavior: contain;
-}
-
-/* --- Image Slider --- */
-.project-slider {
-  position: relative;
-  width: 100%;
-  aspect-ratio: 16 / 10;
-  overflow: hidden;
-  background: var(--bg-primary);
-  flex-shrink: 0;
-}
-
-.project-slider-track {
-  display: flex;
-  height: 100%;
-  transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-}
-
-.project-slider-track .slide {
-  min-width: 100%;
-  height: 100%;
-}
-
-.project-slider-track .slide img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.slider-btn {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  z-index: 5;
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  background: rgba(0, 0, 0, 0.45);
-  backdrop-filter: blur(6px);
-  color: #fff;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all var(--transition-fast);
-  opacity: 0;
-}
-
-.project-slider:hover .slider-btn {
-  opacity: 1;
-}
-
-.slider-btn:hover {
-  background: rgba(99, 102, 241, 0.6);
-  border-color: var(--accent-1);
-}
-
-.slider-btn-prev {
-  left: 10px;
-}
-
-.slider-btn-next {
-  right: 10px;
-}
-
-.slider-dots {
-  position: absolute;
-  bottom: 10px;
-  left: 50%;
-  transform: translateX(-50%);
-  display: flex;
-  gap: 6px;
-  z-index: 5;
-}
-
-.slider-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.35);
-  border: none;
-  cursor: pointer;
-  transition: all var(--transition-fast);
-  padding: 0;
-}
-
-.slider-dot.active {
-  background: var(--accent-1);
-  box-shadow: 0 0 8px rgba(99, 102, 241, 0.5);
-  transform: scale(1.25);
 }
 
 /* --- Modal Info --- */
@@ -1414,12 +1279,6 @@ img {
 
   .project-modal-info {
     padding: 20px 20px 28px;
-  }
-
-  .slider-btn {
-    opacity: 1;
-    width: 32px;
-    height: 32px;
   }
 }
 
